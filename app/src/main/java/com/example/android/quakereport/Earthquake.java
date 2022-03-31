@@ -21,6 +21,12 @@ public class Earthquake {
      */
     private final long mDateTime;
 
+    /**
+     * Constructs a new {@link Earthquake} object
+     * @param magnitude is the magnitude (size) of the earthquake
+     * @param place is the city location of the earthquake
+     * @param dateTime is the date the earthquake happened
+     */
     public Earthquake(float magnitude, String place, long dateTime) {
         mMagnitude = magnitude;
         mPlace = place;
@@ -45,6 +51,6 @@ public class Earthquake {
      * Return date when the event occurred in the epoch format
      */
     public Date getDate() {
-        return new Date(mDateTime * 1000L);
+        return new Date(mDateTime);
     }
 }
