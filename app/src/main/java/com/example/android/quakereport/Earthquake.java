@@ -19,18 +19,18 @@ public class Earthquake {
     /**
      * Time when the event occurred in the epoch format
      */
-    private final long mDateTime;
+    private final long mTimeInMilliseconds;
 
     /**
      * Constructs a new {@link Earthquake} object
      * @param magnitude is the magnitude (size) of the earthquake
      * @param place is the city location of the earthquake
-     * @param dateTime is the date the earthquake happened
+     * @param timeInMilliseconds is the date the earthquake happened
      */
-    public Earthquake(float magnitude, String place, long dateTime) {
+    public Earthquake(float magnitude, String place, long timeInMilliseconds) {
         mMagnitude = magnitude;
         mPlace = place;
-        mDateTime = dateTime;
+        mTimeInMilliseconds = timeInMilliseconds;
     }
 
     /**
@@ -48,9 +48,9 @@ public class Earthquake {
     }
 
     /**
-     * Return date when the event occurred in the epoch format
+     * Return date and time when the event occurred in the epoch format
      */
-    public Date getDate() {
-        return new Date(mDateTime);
+    public Date getDateTime() {
+        return new Date(mTimeInMilliseconds);
     }
 }
