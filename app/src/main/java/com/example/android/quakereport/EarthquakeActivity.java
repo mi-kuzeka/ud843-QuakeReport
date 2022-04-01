@@ -15,8 +15,14 @@
  */
 package com.example.android.quakereport;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -38,10 +44,28 @@ public class EarthquakeActivity extends AppCompatActivity {
         ListView earthquakeListView = findViewById(R.id.list);
 
         // Create a new {@link EarthquakeAdapter} of earthquakes
-        EarthquakeAdapter adapter = new EarthquakeAdapter(this, earthquakes);
+        final EarthquakeAdapter adapter = new EarthquakeAdapter(this, earthquakes);
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
         earthquakeListView.setAdapter(adapter);
+
+        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                // Find the current earthquake that was clicked on
+                Earthquake earthquake = adapter.getItem(i);
+                // Create a new intent to view the earthquake URI
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse(earthquake.getUrl()));
+                try {
+                    // Send the intent to launch a new activity
+                    startActivity(browserIntent);
+                } catch (ActivityNotFoundException ex) {
+                    Toast.makeText(getApplicationContext(),
+                            R.string.browser_not_found, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }

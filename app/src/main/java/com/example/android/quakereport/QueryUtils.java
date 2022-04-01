@@ -54,10 +54,22 @@ public class QueryUtils {
             for (int i = 0; i < features.length(); i++) {
                 JSONObject feature = features.getJSONObject(i);
                 JSONObject properties = feature.getJSONObject("properties");
+
+                // Extract the value for the key called "mag"
                 float magnitude = (float) properties.getDouble("mag");
+
+                // Extract the value for the key called "place"
                 String place = properties.getString("place");
+
+                // Extract the value for the key called "time"
                 long time = properties.getLong("time");
-                Earthquake earthquake = new Earthquake(magnitude, place, time);
+
+                // Extract the value for the key called "url"
+                String url = properties.getString("url");
+
+                // Create a new {@link Earthquake} object with the magnitude, location, time,
+                // and url from the JSON response.
+                Earthquake earthquake = new Earthquake(magnitude, place, time, url);
                 earthquakes.add(earthquake);
             }
 
