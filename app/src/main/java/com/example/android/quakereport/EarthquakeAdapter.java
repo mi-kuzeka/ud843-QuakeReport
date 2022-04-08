@@ -14,8 +14,8 @@ import androidx.core.content.ContextCompat;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class EarthquakeAdapter extends ArrayAdapter<Earthquake> {
@@ -23,7 +23,7 @@ public class EarthquakeAdapter extends ArrayAdapter<Earthquake> {
     private String nameOfPlace;
     private static final String LOCATION_SEPARATOR = " of ";
 
-    public EarthquakeAdapter(@NonNull Context context, ArrayList<Earthquake> earthquakes) {
+    public EarthquakeAdapter(@NonNull Context context, List<Earthquake> earthquakes) {
         super(context, 0, earthquakes);
     }
 
