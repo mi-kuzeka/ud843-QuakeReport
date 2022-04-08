@@ -15,6 +15,7 @@
  */
 package com.example.android.quakereport;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -22,6 +23,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -65,10 +67,14 @@ public class EarthquakeActivity extends AppCompatActivity {
                 Uri earthquakeUri = Uri.parse(currentEarthquake.getUrl());
 
                 // Create a new intent to view the earthquake URI
-                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, earthquakeUri);
-
-                // Send the intent to launch a new activity
-                startActivity(websiteIntent);
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, earthquakeUri);
+                try {
+                    // Send the intent to launch a new activity
+                    startActivity(browserIntent);
+                } catch (ActivityNotFoundException ex) {
+                    Toast.makeText(getApplicationContext(),
+                            R.string.browser_not_found, Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
