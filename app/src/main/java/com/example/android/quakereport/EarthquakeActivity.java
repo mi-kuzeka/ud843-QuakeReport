@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -114,6 +115,12 @@ public class EarthquakeActivity extends AppCompatActivity
     @Override
     public void onLoadFinished(@NonNull Loader<List<Earthquake>> loader, List<Earthquake> earthquakes) {
         Log.v(LOG_TAG, "TEST: onLoadFinished");
+
+        // Hide loading indicator because the data has been loaded
+        ProgressBar loadingSpinner = findViewById(R.id.loading_spinner);
+        loadingSpinner.setVisibility(View.GONE);
+
+        // Set empty state text to display "No earthquakes found."
         mEmptyView.setText(R.string.no_earthquakes);
 
         // Clear the adapter of previous earthquake data
