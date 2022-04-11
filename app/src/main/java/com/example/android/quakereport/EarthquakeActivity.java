@@ -16,7 +16,10 @@
 package com.example.android.quakereport;
 
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -55,6 +58,8 @@ public class EarthquakeActivity extends AppCompatActivity
      */
     private static final int EARTHQUAKE_LOADER_ID = 1;
     private TextView mEmptyView;
+
+    private static ConnectivityManager manager;
 
 
     @Override
@@ -98,11 +103,36 @@ public class EarthquakeActivity extends AppCompatActivity
             }
         });
 
+        if (!isOnline(this)) {
+            noInternetConnection();
+            return;
+        }
+
         LoaderManager loaderManager = getSupportLoaderManager();
 
         Log.v(LOG_TAG, "initLoader");
         // Prepare the loader. Either re-connect with an existing one, or start a new one.
         loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, this);
+    }
+
+    private static boolean isOnline(Context context) {
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            return networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected();
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Problem checking internet connection", e);
+        }
+        return false;
+    }
+
+    private void noInternetConnection() {
+        // Hide loading indicator because the data can't been loaded
+        ProgressBar loadingSpinner = findViewById(R.id.loading_spinner);
+        loadingSpinner.setVisibility(View.GONE);
+
+        TextView noInternetView = (TextView) findViewById(R.id.no_internet);
+        noInternetView.setText(R.string.no_internet);
     }
 
     @NonNull
@@ -115,6 +145,10 @@ public class EarthquakeActivity extends AppCompatActivity
     @Override
     public void onLoadFinished(@NonNull Loader<List<Earthquake>> loader, List<Earthquake> earthquakes) {
         Log.v(LOG_TAG, "TEST: onLoadFinished");
+
+        if (!isOnline(getApplicationContext())) {
+            return;
+        }
 
         // Hide loading indicator because the data has been loaded
         ProgressBar loadingSpinner = findViewById(R.id.loading_spinner);
