@@ -19,9 +19,11 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -51,6 +53,7 @@ public class EarthquakeActivity extends AppCompatActivity
      * This really only comes into play if you're using multiple loaders.
      */
     private static final int EARTHQUAKE_LOADER_ID = 1;
+    private TextView mEmptyView;
 
 
     @Override
@@ -60,6 +63,9 @@ public class EarthquakeActivity extends AppCompatActivity
 
         // Find a reference to the {@link ListView} in the layout
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
+
+        mEmptyView = (TextView) findViewById(R.id.empty_view);
+        earthquakeListView.setEmptyView(mEmptyView);
 
         // Create a new adapter that takes an empty list of earthquakes as input
         mAdapter = new EarthquakeAdapter(this, new ArrayList<Earthquake>());
@@ -93,6 +99,7 @@ public class EarthquakeActivity extends AppCompatActivity
 
         LoaderManager loaderManager = getSupportLoaderManager();
 
+        Log.v(LOG_TAG, "initLoader");
         // Prepare the loader. Either re-connect with an existing one, or start a new one.
         loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, this);
     }
@@ -100,11 +107,15 @@ public class EarthquakeActivity extends AppCompatActivity
     @NonNull
     @Override
     public Loader<List<Earthquake>> onCreateLoader(int id, @Nullable Bundle args) {
+        Log.v(LOG_TAG, "TEST: onCreateLoader");
         return new EarthquakeLoader(this, USGS_REQUEST_URL);
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<List<Earthquake>> loader, List<Earthquake> earthquakes) {
+        Log.v(LOG_TAG, "TEST: onLoadFinished");
+        mEmptyView.setText(R.string.no_earthquakes);
+
         // Clear the adapter of previous earthquake data
         mAdapter.clear();
 
@@ -117,6 +128,7 @@ public class EarthquakeActivity extends AppCompatActivity
 
     @Override
     public void onLoaderReset(@NonNull Loader<List<Earthquake>> loader) {
+        Log.v(LOG_TAG, "TEST: onLoaderReset");
         mAdapter.clear();
     }
 }

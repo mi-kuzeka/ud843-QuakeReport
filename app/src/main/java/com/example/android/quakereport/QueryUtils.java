@@ -23,7 +23,9 @@ import java.util.List;
  */
 public class QueryUtils {
 
-    /** Tag for the log messages */
+    /**
+     * Tag for the log messages
+     */
     public static final String LOG_TAG = QueryUtils.class.getSimpleName();
 
     /**
@@ -38,6 +40,7 @@ public class QueryUtils {
      * Query the USGS dataset and return list of {@link Earthquake} objects.
      */
     public static List<Earthquake> fetchEarthquakesData(String requestUrl) {
+        Log.v(LOG_TAG, "TEST: fetchEarthquakesData");
         // Create URL object
         URL url = createUrl(requestUrl);
 
