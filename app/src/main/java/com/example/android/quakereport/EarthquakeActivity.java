@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -58,21 +59,20 @@ public class EarthquakeActivity extends AppCompatActivity
      * This really only comes into play if you're using multiple loaders.
      */
     private static final int EARTHQUAKE_LOADER_ID = 1;
+
     private TextView mEmptyView;
     private TextView mNoInternetView;
+    private ImageView mRefreshView;
 
     private boolean noInternet = false;
     private boolean hasEarthquakes = false;
-
-    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
 
-        mContext = this;
-
+        // Set custom action bar
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.custom_toolbar);
 
@@ -84,8 +84,18 @@ public class EarthquakeActivity extends AppCompatActivity
 
         mNoInternetView = findViewById(R.id.no_internet);
 
+        // Find image view for refreshing data
+        mRefreshView = findViewById(R.id.refresh_view);
+        hideRefreshView();
+        mRefreshView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                restartLoader();
+            }
+        });
+
         // Create a new adapter that takes an empty list of earthquakes as input
-        mAdapter = new EarthquakeAdapter(mContext, new ArrayList<Earthquake>());
+        mAdapter = new EarthquakeAdapter(this, new ArrayList<Earthquake>());
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
@@ -114,22 +124,23 @@ public class EarthquakeActivity extends AppCompatActivity
             }
         });
 
-        noInternet = !isOnline(mContext);
+        // Check if device has internet connection
+        noInternet = !isOnline(this);
         if (noInternet) {
             // Hide loading indicator because the data can't been loaded
             hideLoadingSpinner();
-
+            // Set text about no internet connection
             setNoInternetText();
+            // Show view for refreshing data
+            showRefreshView();
             return;
         }
 
-        LoaderManager loaderManager = getSupportLoaderManager();
-
-        Log.v(LOG_TAG, "initLoader");
-        // Prepare the loader. Either re-connect with an existing one, or start a new one.
-        loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, this);
+        // Init loader for showing earthquakes
+        initLoader();
     }
 
+    // Check if device has internet connection
     private static boolean isOnline(Context context) {
         try {
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -145,15 +156,17 @@ public class EarthquakeActivity extends AppCompatActivity
     @Override
     public Loader<List<Earthquake>> onCreateLoader(int id, @Nullable Bundle args) {
         Log.v(LOG_TAG, "TEST: onCreateLoader");
-        return new EarthquakeLoader(mContext, USGS_REQUEST_URL);
+        hideRefreshView();
+        return new EarthquakeLoader(EarthquakeActivity.this, USGS_REQUEST_URL);
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<List<Earthquake>> loader, List<Earthquake> earthquakes) {
         Log.v(LOG_TAG, "TEST: onLoadFinished");
 
-        noInternet = !isOnline(mContext);
+        noInternet = !isOnline(EarthquakeActivity.this);
         if (noInternet) {
+            showRefreshView();
             return;
         }
 
@@ -171,7 +184,7 @@ public class EarthquakeActivity extends AppCompatActivity
         } else {
             setEmptyViewText();
         }
-
+        showRefreshView();
     }
 
     @Override
@@ -180,9 +193,32 @@ public class EarthquakeActivity extends AppCompatActivity
         mAdapter.clear();
     }
 
+    private void initLoader() {
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Log.v(LOG_TAG, "initLoader");
+        // Prepare the loader. Either re-connect with an existing one, or start a new one.
+        loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, EarthquakeActivity.this);
+    }
+
+    private void restartLoader() {
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Log.v(LOG_TAG, "initLoader");
+        // Prepare the loader. Either re-connect with an existing one, or start a new one.
+        loaderManager.restartLoader(EARTHQUAKE_LOADER_ID, null, EarthquakeActivity.this);
+    }
+
+    // Hide loading indicator when load is finished
     private void hideLoadingSpinner() {
         ProgressBar loadingSpinner = findViewById(R.id.loading_spinner);
         loadingSpinner.setVisibility(View.GONE);
+    }
+
+    private void hideRefreshView() {
+        mRefreshView.setVisibility(View.INVISIBLE);
+    }
+
+    private void showRefreshView() {
+        mRefreshView.setVisibility(View.VISIBLE);
     }
 
     // Set empty state text to display "No earthquakes found."
