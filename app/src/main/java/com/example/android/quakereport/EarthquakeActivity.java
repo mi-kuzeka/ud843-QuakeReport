@@ -90,7 +90,7 @@ public class EarthquakeActivity extends AppCompatActivity
         mRefreshView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                restartLoader();
+                initLoader(true);
             }
         });
 
@@ -130,14 +130,15 @@ public class EarthquakeActivity extends AppCompatActivity
             // Hide loading indicator because the data can't been loaded
             hideLoadingSpinner();
             // Set text about no internet connection
-            setNoInternetText();
+            showNoInternetText();
             // Show view for refreshing data
             showRefreshView();
             return;
         }
+        hideNoInternetText();
 
         // Init loader for showing earthquakes
-        initLoader();
+        initLoader(false);
     }
 
     // Check if device has internet connection
@@ -170,6 +171,8 @@ public class EarthquakeActivity extends AppCompatActivity
             return;
         }
 
+        hideNoInternetText();
+
         // Hide loading indicator because the data has been loaded
         hideLoadingSpinner();
 
@@ -193,24 +196,35 @@ public class EarthquakeActivity extends AppCompatActivity
         mAdapter.clear();
     }
 
-    private void initLoader() {
+    private void initLoader(boolean isRestart) {
+        mAdapter.clear();
+        noInternet = !isOnline(EarthquakeActivity.this);
+        if (noInternet) {
+            showNoInternetText();
+            return;
+        }
+        hideNoInternetText();
+        showLoadingSpinner();
         LoaderManager loaderManager = getSupportLoaderManager();
         Log.v(LOG_TAG, "initLoader");
         // Prepare the loader. Either re-connect with an existing one, or start a new one.
+        if (isRestart) {
+            loaderManager.restartLoader(EARTHQUAKE_LOADER_ID, null, EarthquakeActivity.this);
+            return;
+        }
         loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, EarthquakeActivity.this);
     }
 
-    private void restartLoader() {
-        LoaderManager loaderManager = getSupportLoaderManager();
-        Log.v(LOG_TAG, "initLoader");
-        // Prepare the loader. Either re-connect with an existing one, or start a new one.
-        loaderManager.restartLoader(EARTHQUAKE_LOADER_ID, null, EarthquakeActivity.this);
-    }
-
-    // Hide loading indicator when load is finished
+    // Hide loading indicator
     private void hideLoadingSpinner() {
         ProgressBar loadingSpinner = findViewById(R.id.loading_spinner);
         loadingSpinner.setVisibility(View.GONE);
+    }
+
+    // Show loading indicator
+    private void showLoadingSpinner() {
+        ProgressBar loadingSpinner = findViewById(R.id.loading_spinner);
+        loadingSpinner.setVisibility(View.VISIBLE);
     }
 
     private void hideRefreshView() {
@@ -227,8 +241,11 @@ public class EarthquakeActivity extends AppCompatActivity
         hasEarthquakes = false;
     }
 
-    // Set empty state text to display "No earthquakes found."
-    private void setNoInternetText() {
-        mNoInternetView.setText(R.string.no_internet);
+    private void showNoInternetText() {
+        mNoInternetView.setVisibility(View.VISIBLE);
+    }
+
+    private void hideNoInternetText() {
+        mNoInternetView.setVisibility(View.GONE);
     }
 }

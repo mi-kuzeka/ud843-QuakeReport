@@ -45,7 +45,8 @@
             android:id="@+id/no_internet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium" />
+            android:textAppearance="?android:textAppearanceMedium"
+            android:text="@string/no_internet"/>
 
         <ProgressBar
             android:id="@+id/loading_spinner"
