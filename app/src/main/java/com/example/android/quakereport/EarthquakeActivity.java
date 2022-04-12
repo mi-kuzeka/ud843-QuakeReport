@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.app.LoaderManager.LoaderCallbacks;
@@ -51,30 +52,40 @@ public class EarthquakeActivity extends AppCompatActivity
      */
     private EarthquakeAdapter mAdapter;
     private static final String USGS_REQUEST_URL =
-            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
+            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=20";
     /**
      * Constant value for the earthquake loader ID. We can choose any integer.
      * This really only comes into play if you're using multiple loaders.
      */
     private static final int EARTHQUAKE_LOADER_ID = 1;
     private TextView mEmptyView;
+    private TextView mNoInternetView;
 
-    private static ConnectivityManager manager;
+    private boolean noInternet = false;
+    private boolean hasEarthquakes = false;
 
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
 
-        // Find a reference to the {@link ListView} in the layout
-        ListView earthquakeListView = (ListView) findViewById(R.id.list);
+        mContext = this;
 
-        mEmptyView = (TextView) findViewById(R.id.empty_view);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setCustomView(R.layout.custom_toolbar);
+
+        // Find a reference to the {@link ListView} in the layout
+        ListView earthquakeListView = findViewById(R.id.list);
+
+        mEmptyView = findViewById(R.id.empty_view);
         earthquakeListView.setEmptyView(mEmptyView);
 
+        mNoInternetView = findViewById(R.id.no_internet);
+
         // Create a new adapter that takes an empty list of earthquakes as input
-        mAdapter = new EarthquakeAdapter(this, new ArrayList<Earthquake>());
+        mAdapter = new EarthquakeAdapter(mContext, new ArrayList<Earthquake>());
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
@@ -103,8 +114,12 @@ public class EarthquakeActivity extends AppCompatActivity
             }
         });
 
-        if (!isOnline(this)) {
-            noInternetConnection();
+        noInternet = !isOnline(mContext);
+        if (noInternet) {
+            // Hide loading indicator because the data can't been loaded
+            hideLoadingSpinner();
+
+            setNoInternetText();
             return;
         }
 
@@ -126,50 +141,58 @@ public class EarthquakeActivity extends AppCompatActivity
         return false;
     }
 
-    private void noInternetConnection() {
-        // Hide loading indicator because the data can't been loaded
-        ProgressBar loadingSpinner = findViewById(R.id.loading_spinner);
-        loadingSpinner.setVisibility(View.GONE);
-
-        TextView noInternetView = (TextView) findViewById(R.id.no_internet);
-        noInternetView.setText(R.string.no_internet);
-    }
-
     @NonNull
     @Override
     public Loader<List<Earthquake>> onCreateLoader(int id, @Nullable Bundle args) {
         Log.v(LOG_TAG, "TEST: onCreateLoader");
-        return new EarthquakeLoader(this, USGS_REQUEST_URL);
+        return new EarthquakeLoader(mContext, USGS_REQUEST_URL);
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<List<Earthquake>> loader, List<Earthquake> earthquakes) {
         Log.v(LOG_TAG, "TEST: onLoadFinished");
 
-        if (!isOnline(getApplicationContext())) {
+        noInternet = !isOnline(mContext);
+        if (noInternet) {
             return;
         }
 
         // Hide loading indicator because the data has been loaded
-        ProgressBar loadingSpinner = findViewById(R.id.loading_spinner);
-        loadingSpinner.setVisibility(View.GONE);
-
-        // Set empty state text to display "No earthquakes found."
-        mEmptyView.setText(R.string.no_earthquakes);
+        hideLoadingSpinner();
 
         // Clear the adapter of previous earthquake data
         mAdapter.clear();
 
         // If there is a valid list of {@link Earthquake}s, then add them to the adapter's
         // data set. This will trigger the ListView to update.
-        if (earthquakes != null && !earthquakes.isEmpty()) {
+        hasEarthquakes = earthquakes != null && !earthquakes.isEmpty();
+        if (hasEarthquakes) {
             mAdapter.addAll(earthquakes);
+        } else {
+            setEmptyViewText();
         }
+
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<List<Earthquake>> loader) {
         Log.v(LOG_TAG, "TEST: onLoaderReset");
         mAdapter.clear();
+    }
+
+    private void hideLoadingSpinner() {
+        ProgressBar loadingSpinner = findViewById(R.id.loading_spinner);
+        loadingSpinner.setVisibility(View.GONE);
+    }
+
+    // Set empty state text to display "No earthquakes found."
+    private void setEmptyViewText() {
+        mEmptyView.setText(R.string.no_earthquakes);
+        hasEarthquakes = false;
+    }
+
+    // Set empty state text to display "No earthquakes found."
+    private void setNoInternetText() {
+        mNoInternetView.setText(R.string.no_internet);
     }
 }

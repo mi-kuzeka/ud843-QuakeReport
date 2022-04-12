@@ -22,4 +22,10 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppBarTextStyle" parent="Widget.AppCompat.TextView">
+        <item name="android:textColor">@color/textColorTitle</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
 </resources>
