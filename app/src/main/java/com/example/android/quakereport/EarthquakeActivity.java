@@ -58,7 +58,6 @@ public class EarthquakeActivity extends AppCompatActivity
     private EarthquakeAdapter mAdapter;
     private static final String USGS_REQUEST_URL =
             "https://earthquake.usgs.gov/fdsnws/event/1/query";
-//            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=20";
     /**
      * Constant value for the earthquake loader ID. We can choose any integer.
      * This really only comes into play if you're using multiple loaders.
@@ -169,6 +168,9 @@ public class EarthquakeActivity extends AppCompatActivity
         String minMagnitude = sharedPreferences.getString(
                 getString(R.string.settings_min_magnitude_key),
                 getString(R.string.settings_min_magnitude_default));
+        String orderBy = sharedPreferences.getString(
+                getString(R.string.settings_order_by_key),
+                getString(R.string.settings_order_by_default));
 
         Uri baseUri = Uri.parse(USGS_REQUEST_URL);
         Uri.Builder uriBuilder = baseUri.buildUpon();
@@ -176,7 +178,7 @@ public class EarthquakeActivity extends AppCompatActivity
         uriBuilder.appendQueryParameter("eventtype", "earthquake");
         uriBuilder.appendQueryParameter("limit", "10");
         uriBuilder.appendQueryParameter("minmag", minMagnitude);
-        uriBuilder.appendQueryParameter("orderby", "time");
+        uriBuilder.appendQueryParameter("orderby", orderBy);
 
         return new EarthquakeLoader(EarthquakeActivity.this, uriBuilder.toString());
     }
